@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Einseitige Homepage mit Gästebuch</title>
+  <style>
+    :root{--bg:#f7f8fb;--card:#fff;--accent:#0b63ff;--muted:#6b7280}
+    body{font-family:Inter,Segoe UI,Arial,sans-serif;margin:0;background:var(--bg);color:#111}
+    header{background:linear-gradient(90deg,#0b63ff22,#7cc7ff22);padding:24px}
+    .container{max-width:900px;margin:24px auto;padding:16px}
+    nav{display:flex;gap:12px;flex-wrap:wrap}
+    a{color:var(--accent);text-decoration:none}
+    h1{margin:0 0 8px}
+    .card{background:var(--card);border-radius:8px;padding:16px;box-shadow:0 2px 8px rgba(16,24,40,0.04);margin-bottom:16px}
+    form{display:grid;gap:8px}
+    input,textarea{padding:8px;border:1px solid #e6e9ef;border-radius:6px;font:inherit}
+    button{background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:6px;cursor:pointer}
+    .entry{border-bottom:1px dashed #eee;padding:10px 0}
+    .meta{color:var(--muted);font-size:0.9rem}
+    footer{font-size:0.85rem;color:var(--muted);text-align:center;margin:24px 0}
+    .controls{display:flex;gap:8px;align-items:center}
+    .error{color:#b91c1c;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <nav>
+        <a href="#home">Home</a>
+        <a href="#gaestebuch">Gästebuch</a>
+        <a href="#impressum">Impressum</a>
+        <a href="#datenschutz">Datenschutz</a>
+      </nav>
+      <h1>Einseitige Demo-Homepage</h1>
+      <p style="margin:8px 0 0;color:var(--muted)">Kurzseite mit Lorem-Text, Impressum, Datenschutz und einfachem Gästebuch (lokal gespeichert).</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="home" class="card">
+      <h2>Willkommen</h2>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Integer vitae augue a orci luctus dictum. Sed vitae arcu a risus tincidunt tincidunt. Aenean at metus id risus malesuada cursus. Duis mattis, nisi a volutpat dapibus, odio sapien tincidunt neque, nec gravida mi nibh sed lectus.</p>
+    </section>
+
+    <section id="gaestebuch" class="card">
+      <h2>Gästebuch</h2>
+      <p class="meta">Bitte Namen angeben. Einträge werden lokal im Browser gespeichert.</p>
+      <form id="guestForm">
+        <label>
+          Name (erforderlich)
+          <input type="text" id="name" name="name" required placeholder="Dein Name">
+        </label>
+        <label>
+          Nachricht
+          <textarea id="message" name="message" rows="4" placeholder="Deine Nachricht (optional)"></textarea>
+        </label>
+        <div class="controls">
+          <button type="submit">Eintrag speichern</button>
+          <button type="button" id="clearBtn" style="background:#e5e7eb;color:#111">Alle Einträge löschen</button>
+        </div>
+        <div id="error" class="error" role="status" aria-live="polite"></div>
+      </form>
+
+      <div id="entries" style="margin-top:12px"></div>
+    </section>
+
+    <section id="impressum" class="card">
+      <h2>Impressum</h2>
+      <p>Angaben gemäß § 5 TMG</p>
+      <p>Betreiber: Pixxelpiraten<br>Adresse: Musterstraße 1, 12345 Beispielstadt<br>E-Mail: info@example.com</p>
+      <p>Haftung für Inhalte: Die Inhalte dieser Seite wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte kann jedoch keine Gewähr übernommen werden.</p>
+    </section>
+
+    <section id="datenschutz" class="card">
+      <h2>Datenschutz</h2>
+      <p>Diese Seite speichert Gästebucheinträge ausschließlich lokal im Browser (LocalStorage). Es werden keine Daten an einen Server übertragen. Wenn Du den Browser-Cache/LocalStorage löschst, gehen die Einträge verloren.</p>
+      <p>Kontakt für Datenschutzanfragen: info@example.com</p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">© 2026 Pixxelpiraten — Einseitige Demo-Homepage</div>
+  </footer>
+
+  <script>
+    const form = document.getElementById('guestForm');
+    const nameInput = document.getElementById('name');
+    const messageInput = document.getElementById('message');
+    const entriesEl = document.getElementById('entries');
+    const errorEl = document.getElementById('error');
+    const clearBtn = document.getElementById('clearBtn');
+
+    const STORAGE_KEY = 'guestbookEntries_v1';
+
+    function loadEntries(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      }catch(e){
+        console.error('Lese-Fehler',e);
+        return [];
+      }
+    }
+
+    function saveEntries(entries){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    }
+
+    function render(){
+      const entries = loadEntries();
+      if(entries.length === 0){
+        entriesEl.innerHTML = '<p class="meta">Noch keine Einträge.</p>';
+        return;
+      }
+      entriesEl.innerHTML = entries.map(e => `
+        <div class="entry">
+          <div><strong>${escapeHtml(e.name)}</strong></div>
+          <div class="meta">${new Date(e.time).toLocaleString()}</div>
+          <div style="margin-top:6px">${escapeHtml(e.message).replace(/\n/g,'<br>')}</div>
+        </div>
+      `).join('');
+    }
+
+    function escapeHtml(str){
+      if(!str) return '';
+      return str.replace(/[&<>"']/g, function(tag){
+        const chars = {"&":"&amp;","<":"&lt;",">":"&gt;", '"':'&quot;', "'":"&#39;"};
+        return chars[tag] || tag;
+      });
+    }
+
+    form.addEventListener('submit', e =>{
+      e.preventDefault();
+      errorEl.textContent = '';
+      const name = nameInput.value.trim();
+      const message = messageInput.value.trim();
+      if(!name){
+        errorEl.textContent = 'Name ist erforderlich.';
+        nameInput.focus();
+        return;
+      }
+      const entries = loadEntries();
+      entries.unshift({name, message, time: Date.now()});
+      saveEntries(entries);
+      render();
+      form.reset();
+    });
+
+    clearBtn.addEventListener('click', ()=>{
+      if(!confirm('Alle Einträge dauerhaft löschen?')) return;
+      localStorage.removeItem(STORAGE_KEY);
+      render();
+    });
+
+    // initial render
+    render();
+  </script>
+</body>
+</html>
