@@ -11,7 +11,7 @@ Voraussetzungen
 
 Installation und Start
 
-1. Öffne ein Terminal im Projektordner (z. B. C:\Users\Pixxel\source\repos\NewRepo)
+1. Öffne ein Terminal im Projektordner
 2. Abhängigkeiten installieren:
 
    npm install
@@ -53,10 +53,8 @@ Gästebucheinträge werden auf dem Serverprojekt im Ordner data gespeichert und 
 
 Weiteres
 
-- index.html wurde so angepasst, dass es die oben genannten API-Endpunkte verwendet.
+- index.html verwendet die oben genannten API-Endpunkte.
 - Anpassungen am Layout oder am Backend können direkt in index.html bzw. server.js vorgenommen werden.
-
-Bei Bedarf kann ich noch eine Anleitung für Deployment, HTTPS oder User-Validierung ergänzen.
 
 Tests
 -----
